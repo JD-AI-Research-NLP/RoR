@@ -1,1 +1,1 @@
-# RoR-TriviaQA
+# RoR

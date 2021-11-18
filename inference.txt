@@ -1,0 +1,69 @@
+# Download Triviaqa-large-model from https://ai2-s2-research.s3-us-west-2.amazonaws.com/longformer/triviaqa-longformer-large.tar.gz
+# Download Triviaqa Dataset 
+# **************************************Data Pre-processing************************************
+# Convert to a squad-like format.
+
+python -m scripts.triviaqa_utils.convert_to_squad_format  \
+  --triviaqa_file path/to/qa/wikipedia-dev.json  \
+  --wikipedia_dir path/to/evidence/wikipedia/   \
+  --web_dir path/to/evidence/web/  \
+  --max_num_tokens 8000  \   
+  --squad_file path/to/output/squad-wikipedia-dev-8000.json
+
+# Convert squad-wikipedia-dev-8000.json to a chunk format.
+
+python scripts.convert_document_to_chunk.py  \
+  --document_file path/to/output/squad-wikipedia-dev-8000.json
+  --chunk_file path/to/output/squad-wikipedia-dev-chunk-8000.json
+
+# **************************************Generate Regional Answers*****************************
+
+python -m triviaqa  \
+    --train_dataset path/to/output/squad-wikipedia-dev-chunk-8000.json  \  # loaded but not used
+    --dev_dataset path/to/output/squad-wikipedia-dev-chunk-8000.json  \
+    --gpus 0  --num_workers 4 \
+    --max_seq_len 4096 --doc_stride -1  \
+    --save_prefix 'triviaqa-longformer-large'  \  
+    --model_path path/to/pretrained/longformer-large-4096  \  # loaded but not used
+    --resume_ckpt   path/to/pretrained/triviaqa-longformer-large-4096  \
+    --prediction_file 'regional.answer.json'  \ 
+    --test   
+    
+# **************************************MSC***************************************************
+
+python scripts.convert_answer_to_text.py  \
+  --regional_answer 'regional.answer.json'
+  --document_file path/to/output/squad-wikipedia-dev-8000.json
+  --evidence_file path/to/evidence/wikipedia/
+  --output_file path/to/squad-wikipedia-dev-condensed.json 
+
+
+# **************************************Generate Global Answers*******************************
+
+python -m triviaqa  \
+    --train_dataset path/to/output/squad-wikipedia-dev-chunk-8000.json \  # loaded but not used
+    --dev_dataset path/to/squad-wikipedia-dev-condensed.json   \
+    --gpus 0  --num_workers 4 \
+    --max_seq_len 4096 --doc_stride -1  \
+    --save_prefix 'triviaqa-longformer-large'  \  
+    --model_path path/to/pretrained/longformer-large-4096  \  # loaded but not used
+    --resume_ckpt   path/to/pretrained/triviaqa-longformer-large-4096  \
+    --prediction_file 'global.answer.json'  \ 
+    --test   
+
+# **************************************Cross-f1**********************************************
+
+python scripts.cross_f1.py  \
+  --regional_answer 'regional.answer.json'
+  --global_answer 'global.answer.json'
+  --output 'ror.answer.json'
+
+# **************************************Evaluation********************************************
+
+python -m scripts.triviaqa_utils.evaluation_utils  \
+--dataset_file path/to/qa/wikipedia-dev.json   \
+--prediction_file 'ror.answer.json'
+
+
+# Output should be:
+{'exact_match': 75.04066057800576, 'f1': 79.96507443329976, 'common': 7991, 'denominator': 7993, 'pred_len': 7991, 'gold_len': 7993}

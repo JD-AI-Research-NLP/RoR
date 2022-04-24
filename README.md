@@ -13,8 +13,10 @@ test-tube==0.7.5
 
 
 ## TriviaQA
-We currently only open source the code in the TriviaQA dataset. To reproduce the results, you don’t have to train any model and can use the pretrained [triviaqa-longformer-large](https://ai2-s2-research.s3-us-west-2.amazonaws.com/longformer/triviaqa-longformer-large.tar.gz) to infer directly. The detailed inference steps are given in the inference.txt.
+To reproduce the results, you don’t have to train any model and can use the pretrained [triviaqa-longformer-large](https://ai2-s2-research.s3-us-west-2.amazonaws.com/longformer/triviaqa-longformer-large.tar.gz) to infer directly. The detailed inference steps are given in the inference.txt.
 
+## QuAC
+The code is realeased in [QuAC](https://github.com/pierre-zhao/RoR)
 
 ## Citation
 

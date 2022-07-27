@@ -6,9 +6,9 @@ This repo provides the code for reproducing the experiments in Findings-EMNLP 20
 
 
 ## Environment
-transformers==2.11.0 <br>
+transformers @ git+http://github.com/ibeltagy/transformers.git@longformer_encoder_decoder#egg=transformers <br>
+pytorch-lightning @ git+http://github.com/ibeltagy/pytorch-lightning.git@v0.8.5_fixes#egg=pytorch-lightning <br>
 torch>=1.6.0 <br>
-pytorch-lightning==1.2.0 <br>
 test-tube==0.7.5 
 
 
